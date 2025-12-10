@@ -45,11 +45,13 @@ class DynamicProfileViewController: UIViewController {
         view.addSubview(loadingIndicator)
         
         nextButton = UIButton(type: .system)
-        nextButton.setTitle("Next Profile", for: .normal)
-        nextButton.titleLabel?.font = .systemFont(ofSize: 18, weight: .semibold)
-        nextButton.backgroundColor = .systemBlue
-        nextButton.setTitleColor(.white, for: .normal)
-        nextButton.layer.cornerRadius = 12
+        let symbolConfig = UIImage.SymbolConfiguration(pointSize: 28, weight: .bold)
+        let nextImage = UIImage(systemName: "chevron.right.circle.fill", withConfiguration: symbolConfig)
+        nextButton.setImage(nextImage, for: .normal)
+        nextButton.tintColor = .systemBlue
+        nextButton.backgroundColor = .clear
+        nextButton.contentEdgeInsets = .zero
+        nextButton.accessibilityLabel = "Next Profile"
         nextButton.translatesAutoresizingMaskIntoConstraints = false
         nextButton.addTarget(self, action: #selector(nextButtonTapped), for: .touchUpInside)
         view.addSubview(nextButton)
@@ -58,7 +60,7 @@ class DynamicProfileViewController: UIViewController {
             scrollView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            scrollView.bottomAnchor.constraint(equalTo: nextButton.topAnchor, constant: -16),
+            scrollView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
             
             contentView.topAnchor.constraint(equalTo: scrollView.topAnchor, constant: 16),
             contentView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor, constant: 16),
@@ -69,10 +71,10 @@ class DynamicProfileViewController: UIViewController {
             loadingIndicator.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             loadingIndicator.centerYAnchor.constraint(equalTo: view.centerYAnchor),
             
-            nextButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             nextButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            nextButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16),
-            nextButton.heightAnchor.constraint(equalToConstant: 50)
+            nextButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -24),
+            nextButton.widthAnchor.constraint(equalToConstant: 56),
+            nextButton.heightAnchor.constraint(equalToConstant: 56)
         ])
     }
     
@@ -109,9 +111,8 @@ class DynamicProfileViewController: UIViewController {
             }
         }
         
-        nextButton.setTitle(viewModel.nextButtonTitle, for: .normal)
         nextButton.isEnabled = viewModel.canNavigateToNext
-        nextButton.backgroundColor = viewModel.canNavigateToNext ? .systemBlue : .systemGray
+        nextButton.tintColor = viewModel.canNavigateToNext ? .systemBlue : .systemGray
     }
     
     private func createView(for fieldName: String, profile: Profile) -> UIView? {
@@ -128,7 +129,7 @@ class DynamicProfileViewController: UIViewController {
             guard let age = profile.age else { return nil }
             return createLabelView(title: "Age", text: "\(age)", style: .body)
         case "gender":
-            return createLabelView(title: "Gender", text: profile.gender, style: .body)
+            return createLabelView(title: "Gender", text: formattedGender(profile.gender), style: .body)
         case "school":
             guard let school = profile.school else { return nil }
             return createLabelView(title: "School", text: school, style: .body)
@@ -222,9 +223,10 @@ class DynamicProfileViewController: UIViewController {
         textView.font = .preferredFont(forTextStyle: .body)
         textView.isEditable = false
         textView.isScrollEnabled = false
-        textView.backgroundColor = .systemGray6
-        textView.layer.cornerRadius = 8
-        textView.textContainerInset = UIEdgeInsets(top: 12, left: 12, bottom: 12, right: 12)
+        textView.backgroundColor = .clear
+        textView.layer.cornerRadius = 0
+        textView.textContainerInset = .zero
+        textView.textContainer.lineFragmentPadding = 0
         textView.translatesAutoresizingMaskIntoConstraints = false
         
         containerView.addSubview(titleLabel)
@@ -243,6 +245,17 @@ class DynamicProfileViewController: UIViewController {
         ])
         
         return containerView
+    }
+    
+    private func formattedGender(_ raw: String) -> String {
+        switch raw.lowercased() {
+        case "m", "male":
+            return "Male"
+        case "f", "female":
+            return "Female"
+        default:
+            return raw.capitalized
+        }
     }
     
     @objc private func nextButtonTapped() {
