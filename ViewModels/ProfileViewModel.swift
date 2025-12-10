@@ -87,7 +87,6 @@ class ProfileViewModel {
                 loadedProfiles = profiles
             case .failure(let error):
                 loadError = error
-                print("Error loading profiles: \(error)")
             }
         }
         
@@ -101,7 +100,6 @@ class ProfileViewModel {
                 if loadError == nil {
                     loadError = error
                 }
-                print("Error loading configuration: \(error)")
             }
         }
         
