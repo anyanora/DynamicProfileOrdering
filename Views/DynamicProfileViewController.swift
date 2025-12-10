@@ -105,12 +105,17 @@ class DynamicProfileViewController: UIViewController {
         contentView.arrangedSubviews.forEach { $0.removeFromSuperview() }
         
         // Add views for ordered fields
-        let fields = viewModel.orderedFields
-        if fields.isEmpty {
+        guard let profile = viewModel.currentProfile else {
+            showEmptyState()
+            return
+        }
+        
+        let fieldNames = viewModel.orderedFieldNames
+        if fieldNames.isEmpty {
             showEmptyState()
         } else {
-            for fieldViewModel in fields {
-                if let view = createView(for: fieldViewModel) {
+            for fieldName in fieldNames {
+                if let view = createView(for: fieldName, profile: profile) {
                     contentView.addArrangedSubview(view)
                 }
             }
@@ -123,22 +128,36 @@ class DynamicProfileViewController: UIViewController {
     }
     
     // MARK: - View Creation
-    private func createView(for fieldViewModel: ProfileFieldViewModel) -> UIView? {
-        switch fieldViewModel.type {
-        case .photo:
-            return createPhotoView(photos: fieldViewModel.photos ?? [])
-        case .aboutMe:
-            guard let text = fieldViewModel.value else { return nil }
-            return createTextView(title: fieldViewModel.title, text: text)
-        case .name:
-            return createLabelView(title: fieldViewModel.title, text: fieldViewModel.value ?? "", style: .title1)
-        case .age, .school, .job, .location:
-            guard let text = fieldViewModel.value else { return nil }
-            return createLabelView(title: fieldViewModel.title, text: text, style: .body)
+    private func createView(for fieldName: String, profile: Profile) -> UIView? {
+        switch fieldName {
+        case "photo":
+            guard let photoURL = profile.photo else { return nil }
+            return createPhotoView(photoURL: photoURL)
+        case "about_me", "about":
+            guard let about = profile.about else { return nil }
+            return createTextView(title: "About Me", text: about)
+        case "name":
+            return createLabelView(title: "Name", text: profile.name, style: .title1)
+        case "age":
+            guard let age = profile.age else { return nil }
+            return createLabelView(title: "Age", text: "\(age)", style: .body)
+        case "gender":
+            return createLabelView(title: "Gender", text: profile.gender, style: .body)
+        case "school":
+            guard let school = profile.school else { return nil }
+            return createLabelView(title: "School", text: school, style: .body)
+        case "job":
+            guard let job = profile.job else { return nil }
+            return createLabelView(title: "Job", text: job, style: .body)
+        case "location":
+            guard let location = profile.location else { return nil }
+            return createLabelView(title: "Location", text: location, style: .body)
+        default:
+            return nil
         }
     }
     
-    private func createPhotoView(photos: [String]) -> UIView {
+    private func createPhotoView(photoURL: String) -> UIView {
         let containerView = UIView()
         containerView.translatesAutoresizingMaskIntoConstraints = false
         
@@ -150,7 +169,7 @@ class DynamicProfileViewController: UIViewController {
         imageView.translatesAutoresizingMaskIntoConstraints = false
         
         // Load image from URL
-        if let urlString = photos.first, let url = URL(string: urlString) {
+        if let url = URL(string: photoURL) {
             loadImage(from: url, into: imageView)
         } else {
             imageView.image = UIImage(systemName: "person.fill")

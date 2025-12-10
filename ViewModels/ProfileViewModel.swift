@@ -33,13 +33,32 @@ class ProfileViewModel {
         return configuration?.fieldOrder ?? defaultFieldOrder()
     }
     
-    var orderedFields: [ProfileFieldViewModel] {
+    var orderedFieldNames: [String] {
         guard let profile = currentProfile else { return [] }
         
-        return fieldOrder.compactMap { fieldName in
-            guard let fieldType = ProfileFieldType(rawValue: fieldName) else { return nil }
-            let fieldViewModel = ProfileFieldViewModel(type: fieldType, profile: profile)
-            return fieldViewModel.shouldDisplay ? fieldViewModel : nil
+        return fieldOrder.filter { fieldName in
+            shouldDisplayField(fieldName, in: profile)
+        }
+    }
+    
+    private func shouldDisplayField(_ fieldName: String, in profile: Profile) -> Bool {
+        switch fieldName {
+        case "photo":
+            return profile.photo != nil
+        case "about_me", "about":
+            return profile.about != nil
+        case "name", "gender":
+            return true // Always display
+        case "age":
+            return profile.age != nil
+        case "school":
+            return profile.school != nil
+        case "job":
+            return profile.job != nil
+        case "location":
+            return profile.location != nil
+        default:
+            return false
         }
     }
     
