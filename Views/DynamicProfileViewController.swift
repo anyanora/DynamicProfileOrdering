@@ -2,14 +2,12 @@ import UIKit
 
 class DynamicProfileViewController: UIViewController {
     
-    // MARK: - Properties
     private let viewModel: ProfileViewModel
     private var scrollView: UIScrollView!
     private var contentView: UIStackView!
     private var nextButton: UIButton!
     private var loadingIndicator: UIActivityIndicatorView!
     
-    // MARK: - Initialization
     init(viewModel: ProfileViewModel = ProfileViewModel()) {
         self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
@@ -20,7 +18,6 @@ class DynamicProfileViewController: UIViewController {
         super.init(coder: coder)
     }
     
-    // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
@@ -28,30 +25,25 @@ class DynamicProfileViewController: UIViewController {
         viewModel.loadProfiles()
     }
     
-    // MARK: - Setup
     private func setupUI() {
         view.backgroundColor = .systemBackground
         title = "Profile"
         
-        // Scroll View
         scrollView = UIScrollView()
         scrollView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(scrollView)
         
-        // Content Stack View
         contentView = UIStackView()
         contentView.axis = .vertical
         contentView.spacing = 16
         contentView.translatesAutoresizingMaskIntoConstraints = false
         scrollView.addSubview(contentView)
         
-        // Loading Indicator
         loadingIndicator = UIActivityIndicatorView(style: .large)
         loadingIndicator.hidesWhenStopped = true
         loadingIndicator.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(loadingIndicator)
         
-        // Next Button
         nextButton = UIButton(type: .system)
         nextButton.setTitle("Next Profile", for: .normal)
         nextButton.titleLabel?.font = .systemFont(ofSize: 18, weight: .semibold)
@@ -62,7 +54,6 @@ class DynamicProfileViewController: UIViewController {
         nextButton.addTarget(self, action: #selector(nextButtonTapped), for: .touchUpInside)
         view.addSubview(nextButton)
         
-        // Constraints
         NSLayoutConstraint.activate([
             scrollView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
@@ -88,8 +79,7 @@ class DynamicProfileViewController: UIViewController {
     private func setupViewModel() {
         viewModel.delegate = self
     }
-    
-    // MARK: - UI Updates
+ 
     private func updateUI() {
         if viewModel.isLoading {
             loadingIndicator.startAnimating()
@@ -101,10 +91,8 @@ class DynamicProfileViewController: UIViewController {
         loadingIndicator.stopAnimating()
         contentView.isHidden = false
         
-        // Clear existing views
         contentView.arrangedSubviews.forEach { $0.removeFromSuperview() }
         
-        // Add views for ordered fields
         guard let profile = viewModel.currentProfile else {
             showEmptyState()
             return
@@ -121,13 +109,11 @@ class DynamicProfileViewController: UIViewController {
             }
         }
         
-        // Update button state
         nextButton.setTitle(viewModel.nextButtonTitle, for: .normal)
         nextButton.isEnabled = viewModel.canNavigateToNext
         nextButton.backgroundColor = viewModel.canNavigateToNext ? .systemBlue : .systemGray
     }
     
-    // MARK: - View Creation
     private func createView(for fieldName: String, profile: Profile) -> UIView? {
         switch fieldName {
         case "photo":
@@ -168,7 +154,6 @@ class DynamicProfileViewController: UIViewController {
         imageView.backgroundColor = .systemGray5
         imageView.translatesAutoresizingMaskIntoConstraints = false
         
-        // Load image from URL
         if let url = URL(string: photoURL) {
             loadImage(from: url, into: imageView)
         } else {
@@ -260,12 +245,10 @@ class DynamicProfileViewController: UIViewController {
         return containerView
     }
     
-    // MARK: - Actions
     @objc private func nextButtonTapped() {
         viewModel.moveToNextProfile()
     }
     
-    // MARK: - Helpers
     private func loadImage(from url: URL, into imageView: UIImageView) {
         URLSession.shared.dataTask(with: url) { data, response, error in
             guard let data = data, let image = UIImage(data: data) else {
@@ -318,7 +301,6 @@ class DynamicProfileViewController: UIViewController {
     }
 }
 
-// MARK: - ProfileViewModelDelegate
 extension DynamicProfileViewController: ProfileViewModelDelegate {
     func profileViewModelDidUpdateState(_ viewModel: ProfileViewModel) {
         updateUI()

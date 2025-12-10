@@ -1,10 +1,3 @@
-//
-//  ProfileViewModel.swift
-//  DynamicProfileOrdering
-//
-//  Created on $(date)
-//
-
 import Foundation
 
 protocol ProfileViewModelDelegate: AnyObject {
@@ -15,7 +8,6 @@ protocol ProfileViewModelDelegate: AnyObject {
 
 class ProfileViewModel {
     
-    // MARK: - Properties
     weak var delegate: ProfileViewModelDelegate?
     
     private var profiles: [Profile] = []
@@ -23,7 +15,6 @@ class ProfileViewModel {
     private var configuration: ProfileConfiguration?
     private let networkService: ProfileConfigurationFetcher
     
-    // MARK: - Computed Properties
     var currentProfile: Profile? {
         guard currentProfileIndex < profiles.count else { return nil }
         return profiles[currentProfileIndex]
@@ -48,7 +39,7 @@ class ProfileViewModel {
         case "about_me", "about":
             return profile.about != nil
         case "name", "gender":
-            return true // Always display
+            return true
         case "age":
             return profile.age != nil
         case "school":
@@ -76,12 +67,10 @@ class ProfileViewModel {
         }
     }
     
-    // MARK: - Initialization
     init(networkService: ProfileConfigurationFetcher = ProfileConfigurationFetcher.shared) {
         self.networkService = networkService
     }
     
-    // MARK: - Public Methods
     func loadProfiles() {
         isLoading = true
         
@@ -90,7 +79,6 @@ class ProfileViewModel {
         var loadedConfiguration: ProfileConfiguration?
         var loadError: Error?
         
-        // Load profiles
         group.enter()
         networkService.fetchProfiles { [weak self] result in
             defer { group.leave() }
@@ -103,7 +91,6 @@ class ProfileViewModel {
             }
         }
         
-        // Load configuration
         group.enter()
         networkService.fetchProfileConfiguration { result in
             defer { group.leave() }
@@ -131,7 +118,6 @@ class ProfileViewModel {
             self.configuration = loadedConfiguration
             
             if self.profiles.isEmpty {
-                // Handle empty state
                 self.delegate?.profileViewModelDidUpdateState(self)
             } else {
                 self.delegate?.profileViewModelDidUpdateState(self)
@@ -154,7 +140,6 @@ class ProfileViewModel {
         delegate?.profileViewModelDidUpdateState(self)
     }
     
-    // MARK: - Private Methods
     private func defaultFieldOrder() -> [String] {
         return ["photo", "name", "age", "about_me", "school", "job", "location"]
     }

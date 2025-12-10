@@ -8,8 +8,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         
         window = UIWindow(frame: UIScreen.main.bounds)
-        
-        // Create ViewModel with dependency injection
+
         let viewModel = ProfileViewModel(networkService: ProfileConfigurationFetcher.shared)
         let dynamicProfileViewController = DynamicProfileViewController(viewModel: viewModel)
         let navigationController = UINavigationController(rootViewController: dynamicProfileViewController)
